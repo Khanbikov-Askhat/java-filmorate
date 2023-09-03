@@ -1,61 +1,82 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
+import ru.yandex.practicum.filmorate.exceptions.UserNotExistException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 @Slf4j
 public class UserController {
 
+    private Integer userId = 0;
     private HashMap<Integer,User> users = new HashMap<>();
 
     @GetMapping("/users")
-    public HashMap<Integer, User> findAll() {
-        log.debug("Текущее количество пользователей: {}", users.size());
-        return users;
+    public List<User> findAll() {
+        log.debug("Текущее количество фильмов: {}", users.size());
+        return new ArrayList<>(users.values());
     }
 
     @PostMapping(value = "/users")
-    public User create(@RequestBody User user) {
+    public User create(@Valid @RequestBody User user) {
+        //validate(user);
+        if ((user.getName() == null)) {
+            user.setName(user.getLogin());
+        }
         if (user.getEmail().contains(" ")) {
             log.debug("User's email must not have whitespaces", user.getEmail());
             throw new ValidationException("User's email must not have whitespaces");
-        } else if (users.containsValue(user)) {
+        }
+        if (user.getLogin().contains(" ")) {
+            log.debug("User's login must not have whitespaces", user.getEmail());
+            throw new ValidationException("User's login must not have whitespaces");
+        }
+        if (users.containsValue(user)) {
             log.debug("User's email must not have whitespaces", user);
             throw new ValidationException("User already exists");
-        } else if (user.getName().isEmpty() || (user.getName() == null)) {
-            user.setName(user.getLogin());
-            users.put(user.getId(), user);
-            log.debug(user.toString());
-            return user;
-        } else {
-            users.put(user.getId(), user);
-            log.debug(user.toString());
-            return user;
         }
+
+        int id = ++userId;
+        user.setId(id);
+        users.put(id, user);
+        log.debug(user.toString());
+        return user;
+
     }
 
     @PutMapping(value = "/users")
-    public User AddOrUpdate(@RequestBody User user) {
+    public User AddOrUpdate(@Valid @RequestBody User user) {
         if (user.getEmail().contains(" ")) {
             log.debug("User's email must not have whitespaces", user.getEmail());
             throw new ValidationException("User's email must not have whitespaces");
         }
-        if (users.containsValue(user)) {
-            for (Integer id: users.keySet()) {
-                if (users.get(id).equals(user)) {
-                    users.put(id, user);
-                }
-            }
-        } else {
-            users.put(user.getId(), user);
+        if (user.getLogin().contains(" ")) {
+            log.debug("User's login must not have whitespaces", user.getEmail());
+            throw new ValidationException("User's login must not have whitespaces");
         }
-        return user;
+        if (users.containsKey(user.getId())) {
+            users.put(user.getId(), user);
+            log.debug(user.toString());
+            return user;
+        } else {
+            throw new UserNotExistException("This film does not exist");
+        }
+    }
+
+    public static void validate(User user) {
+        if (isNameBlank(user)) {
+            user.setName(user.getLogin());
+        }
+    }
+
+    private static boolean isNameBlank(User user) {
+        return user.getName().isBlank();
     }
 }

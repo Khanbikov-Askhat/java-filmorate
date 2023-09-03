@@ -3,24 +3,28 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import ru.yandex.practicum.filmorate.exceptions.FilmNotExistException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 @Slf4j
 public class FilmController {
 
+    private Integer filmId = 0;
     private HashMap<Integer, Film> films = new HashMap<>();
 
     @GetMapping("/films")
-    public HashMap<Integer, Film> findAll() {
+    public List<Film> findAll() {
         log.debug("Текущее количество фильмов: {}", films.size());
-        return films;
+        return new ArrayList<>(films.values());
     }
 
     @PostMapping(value = "/films")
@@ -30,7 +34,9 @@ public class FilmController {
         } else if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("Film should be released after 27.12.1895");
         } else {
-            films.put(film.getId(), film);
+            int id = ++filmId;
+            film.setId(id);
+            films.put(id, film);
             log.debug(film.toString());
             return film;
         }
@@ -41,17 +47,12 @@ public class FilmController {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("Film must be released after 27.12.1895");
         }
-        if (films.containsValue(film)) {
-            for (Integer id: films.keySet()) {
-                if (films.get(id).equals(film)) {
-                    log.debug(film.toString());
-                    films.put(id, film);
-                }
-            }
-        } else {
-            log.debug(film.toString());
+        if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
+            log.debug(film.toString());
+            return film;
+        } else {
+            throw new FilmNotExistException("List don't contains this film");
         }
-        return film;
     }
 }

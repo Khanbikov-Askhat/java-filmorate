@@ -10,22 +10,15 @@ import java.time.LocalDate;
 
 @Data
 public class Film {
-    public Film(Integer id, @NonNull String name, String description, LocalDate releaseDate, Long duration) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-    }
 
     private Integer id;
     @NotBlank
     @NonNull
-    private String name;
+    private final String name;
     @Size(max = 200)
-    private String description;
-    private LocalDate releaseDate;
+    private final String description;
     @Min(1)
-    private Long duration;
+    private final Long duration;
+    private final LocalDate releaseDate;
 
 }
