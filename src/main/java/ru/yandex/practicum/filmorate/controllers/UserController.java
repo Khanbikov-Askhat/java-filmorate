@@ -26,7 +26,6 @@ public class UserController {
 
     @PostMapping(value = "/users")
     public User create(@Valid @RequestBody User user) {
-        //validate(user);
         if ((user.getName() == null)) {
             user.setName(user.getLogin());
         }
@@ -42,7 +41,6 @@ public class UserController {
             log.debug("User's email must not have whitespaces", user);
             throw new ValidationException("User already exists");
         }
-
         int id = ++userId;
         user.setId(id);
         users.put(id, user);
@@ -70,13 +68,4 @@ public class UserController {
         }
     }
 
-    public static void validate(User user) {
-        if (isNameBlank(user)) {
-            user.setName(user.getLogin());
-        }
-    }
-
-    private static boolean isNameBlank(User user) {
-        return user.getName().isBlank();
-    }
 }
