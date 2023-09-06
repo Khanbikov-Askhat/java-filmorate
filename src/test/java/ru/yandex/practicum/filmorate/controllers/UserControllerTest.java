@@ -99,7 +99,7 @@ public class UserControllerTest {
                 .login(VALID_LOGIN)
                 .name("AskhatCheck")
                 .build();
-        updatedUser.setId(1);
+        updatedUser.setId(1L);
         String body = mapper.writeValueAsString(updatedUser);
         this.mockMvc.perform(put(URL).content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -114,7 +114,7 @@ public class UserControllerTest {
                 .login(VALID_LOGIN)
                 .name("AskhatCheck")
                 .build();
-        updatedUser.setId(1);
+        updatedUser.setId(1L);
         String body = mapper.writeValueAsString(updatedUser);
         this.mockMvc.perform(put(URL).content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
@@ -128,7 +128,7 @@ public class UserControllerTest {
                 .login(VALID_LOGIN)
                 .name("AskhatCheck")
                 .build();
-        updatedUser.setId(1);
+        updatedUser.setId(1L);
         String body = mapper.writeValueAsString(updatedUser);
         this.mockMvc.perform(put(URL).content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
@@ -142,7 +142,7 @@ public class UserControllerTest {
                 .email(VALID_EMAIL)
                 .name("AskhatCheck")
                 .build();
-        updatedUser.setId(1);
+        updatedUser.setId(1L);
         String body = mapper.writeValueAsString(updatedUser);
         this.mockMvc.perform(put(URL).content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
@@ -157,7 +157,7 @@ public class UserControllerTest {
                 .login(VALID_LOGIN)
                 .name("AskhatCheck")
                 .build();
-        updatedUser.setId(1);
+        updatedUser.setId(1L);
         String body = mapper.writeValueAsString(updatedUser);
         this.mockMvc.perform(put(URL).content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
