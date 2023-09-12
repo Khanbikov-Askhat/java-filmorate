@@ -24,8 +24,10 @@ public class FilmController {
 
     @GetMapping("/films")
     public List<Film> findAll() {
-        log.debug("Текущее количество фильмов: {}", films.size());
-        return new ArrayList<>(films.values());
+        log.debug("Пришел запрос GET /films");
+        List listOfFilms = new ArrayList<>(films.values());
+        log.debug("Отправлен овтет на GET запрос /films с телом: {}", listOfFilms);
+        return listOfFilms;
     }
 
     @PostMapping(value = "/films")
