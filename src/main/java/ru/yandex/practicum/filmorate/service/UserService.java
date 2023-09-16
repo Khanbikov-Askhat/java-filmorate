@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class UserService {
-    private InMemoryUserStorage inMemoryUserStorage;
+    private final InMemoryUserStorage inMemoryUserStorage;
 
     @Autowired
     public UserService(InMemoryUserStorage inMemoryUserStorage) {
@@ -40,8 +40,6 @@ public class UserService {
     }
 
     public User addFriend(Long userId, Long friendId) {
-        isUserExist(userId);
-        isUserExist(friendId);
         User user = inMemoryUserStorage.getUserById(userId);
         User friend = inMemoryUserStorage.getUserById(friendId);
         if (user.setFriendsId(friendId)) {
@@ -56,9 +54,8 @@ public class UserService {
     }
 
     public User deleteFriend(Long userId, Long friendId) {
-        isUserExist(userId);
-        isUserExist(friendId);
         User user = inMemoryUserStorage.getUserById(userId);
+        User friend = inMemoryUserStorage.getUserById(friendId);
         user.removeFriend(friendId);
         return user;
     }
@@ -73,8 +70,6 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(long userId, long friendId) {
-        isUserExist(userId);
-        isUserExist(friendId);
         Set<Long> userFriendSet= getUserById(userId).getFriendsId();
         Set<Long> anotherUserFriendSet = getUserById(friendId).getFriendsId();
         if (userFriendSet.isEmpty() || anotherUserFriendSet.isEmpty()) {
@@ -88,12 +83,6 @@ public class UserService {
             userFriends.add(inMemoryUserStorage.getUserById(id));
         }
         return userFriends;
-    }
-
-    public void isUserExist(Long userId) {
-        if (!inMemoryUserStorage.isUserExist(userId)) {
-            throw new UserNotExistException("Пользователя с id " + userId + " не существует");
-        }
     }
 
 

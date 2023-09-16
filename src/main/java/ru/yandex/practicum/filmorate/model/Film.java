@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,7 +15,6 @@ import java.util.Set;
 @Builder
 public class Film {
 
-    private Set<Long> filmLikes;
     private Long id;
     @NotNull
     private String name;
@@ -23,6 +23,8 @@ public class Film {
     @Min(1)
     private Long duration;
     private LocalDate releaseDate;
+    @JsonIgnore
+    private Set<Long> filmLikes;
 
     public boolean setFilmLikes (Long friendId) {
         if (filmLikes == null) {

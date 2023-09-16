@@ -21,8 +21,7 @@ public class InMemoryFilmStorage {
 
 
     public List<Film> findAll() {
-        List listOfFilms = new ArrayList<>(films.values());
-        return listOfFilms;
+        return new ArrayList<>(films.values());
     }
 
     public Film create(Film film) {
@@ -43,19 +42,11 @@ public class InMemoryFilmStorage {
     }
 
     public Film getFilmById(Long id) {
-        if (isFilmExist(id)) {
-            return films.get(id);
-        } else {
+        Film film = films.get(id);
+        if (film == null) {
             throw new FilmNotExistException("В списке нет такого фильма");
         }
-    }
-
-    public boolean isFilmExist(Long filmId) {
-        if (films.containsKey(filmId)) {
-            return true;
-        } else {
-            return false;
-        }
+        return film;
     }
 
     public void validateFilm(Film film) {

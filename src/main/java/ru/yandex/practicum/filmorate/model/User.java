@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,7 +15,6 @@ import java.util.Set;
 @Builder
 public class User {
 
-    private Set<Long> friendsId;
     private Long id;
     @NotBlank
     @Email
@@ -24,6 +24,8 @@ public class User {
     private String name;
     @Past
     private LocalDate birthday;
+    @JsonIgnore
+    private Set<Long> friendsId;
 
     public boolean setFriendsId (Long friendId) {
         if (friendsId == null) {

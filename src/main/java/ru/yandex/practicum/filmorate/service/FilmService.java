@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.film.FilmNotExistException;
 import ru.yandex.practicum.filmorate.exceptions.film.LikeNotAddedException;
 import ru.yandex.practicum.filmorate.exceptions.user.UserNotExistException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
@@ -16,8 +17,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class FilmService {
-    private InMemoryFilmStorage inMemoryFilmStorage;
-    private InMemoryUserStorage inMemoryUserStorage;
+    private final InMemoryFilmStorage inMemoryFilmStorage;
+    private final InMemoryUserStorage inMemoryUserStorage;
 
     @Autowired
     public FilmService(InMemoryFilmStorage inMemoryFilmStorage, InMemoryUserStorage inMemoryUserStorage) {
@@ -43,8 +44,7 @@ public class FilmService {
     }
 
     public Film addLike(Long filmId, Long userId) {
-        isFilmExist(filmId);
-        isUserExist(userId);
+        User user = inMemoryUserStorage.getUserById(userId);
         Film film = inMemoryFilmStorage.getFilmById(filmId);
         if (film.setFilmLikes(filmId)) {
             return film;
@@ -54,8 +54,7 @@ public class FilmService {
     }
 
     public Film deleteLike(Long filmId, Long userId) {
-        isFilmExist(filmId);
-        isUserExist(userId);
+        User user = inMemoryUserStorage.getUserById(userId);
         Film film = inMemoryFilmStorage.getFilmById(userId);
         film.removeLike(userId);
         return film;
@@ -68,15 +67,5 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-    public void isFilmExist(Long filmId) {
-        if (!inMemoryFilmStorage.isFilmExist(filmId)) {
-            throw new FilmNotExistException("фильма с id " + filmId + " не существует");
-        }
-    }
 
-    public void isUserExist(Long userId) {
-        if (!inMemoryUserStorage.isUserExist(userId)) {
-            throw new UserNotExistException("Пользователя с id " + userId + " не существует");
-        }
-    }
 }

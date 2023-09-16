@@ -75,17 +75,9 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> getSortedFilmsByLikes(@RequestParam(value = "count", required = false, defaultValue = "10")
                                                 @Min(1) Long count) {
-        if (count > 0) {
-            log.info("Получен GET-запрос /popular?count={}", count);
-        } else {
-            log.info("Получен GET-запрос /popular");
-        }
+        log.info("Получен GET-запрос /popular?count={}", count);
         List<Film> filmsList = filmService.getSortedFilmsByLikes(count);
-        if (count > 0) {
-            log.info("Отправлен ответ на GET-запрос /popular?count={} c телом {}", count, filmsList);
-        } else {
-            log.info("Отправлен ответ на GET-запрос /popular c телом {}", filmsList);
-        }
+        log.info("Отправлен ответ на GET-запрос /popular c телом {}", filmsList);
         return filmsList;
     }
 }

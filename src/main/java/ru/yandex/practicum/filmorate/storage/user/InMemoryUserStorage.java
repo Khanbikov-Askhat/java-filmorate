@@ -44,12 +44,11 @@ public class InMemoryUserStorage {
     }
 
     public User getUserById(Long id) {
-        if (isUserExist(id)) {
-            User foundedUser = users.get(id);
-            return foundedUser;
-        } else {
+        User user = users.get(id);
+        if (user == null) {
             throw new UserNotExistException("Такого пользователя не существует");
         }
+        return user;
     }
 
     public void validateUser(User user) {
