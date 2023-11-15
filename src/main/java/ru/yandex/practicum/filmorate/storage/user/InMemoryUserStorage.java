@@ -2,20 +2,22 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.user.UserNotExistException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.user.UserNotExistException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
 public class InMemoryUserStorage {
 
+    private final Map<Long, User> users = new HashMap<>();
     private Long generatorId = 0L;
-    private Map<Long, User> users = new HashMap<>();
-
 
     public List<User> findAll() {
         return new ArrayList<>(users.values());
@@ -55,7 +57,7 @@ public class InMemoryUserStorage {
         if ((user.getName() == null) || (user.getName().isBlank())) {
             user.setName(user.getLogin());
         }
-        if (user.getEmail().contains(" ")) {
+        if (user.getEmail().isEmpty()) {
             log.debug("Email пользователя не должен содежать пробелы", user.getEmail());
             throw new ValidationException("Email пользователя не должен содежать пробелы");
         }
@@ -66,10 +68,6 @@ public class InMemoryUserStorage {
     }
 
     public boolean isUserExist(Long userId) {
-        if (users.containsKey(userId)) {
-            return true;
-        } else {
-            return false;
-        }
+        return users.containsKey(userId);
     }
 }

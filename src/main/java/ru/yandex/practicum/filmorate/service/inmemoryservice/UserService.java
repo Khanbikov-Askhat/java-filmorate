@@ -1,10 +1,9 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.inmemoryservice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.user.FriendNotAddedException;
-import ru.yandex.practicum.filmorate.exceptions.user.UserNotExistException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
@@ -42,8 +41,7 @@ public class UserService {
     public User addFriend(Long userId, Long friendId) {
         User user = inMemoryUserStorage.getUserById(userId);
         User friend = inMemoryUserStorage.getUserById(friendId);
-        if (user.setFriendsId(friendId)) {
-        } else {
+        if (!user.setFriendsId(friendId)) {
             throw new FriendNotAddedException("Друг с id " + friendId + " не был добавлен");
         }
         if (friend.setFriendsId(userId)) {
@@ -70,7 +68,7 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(long userId, long friendId) {
-        Set<Long> userFriendSet= getUserById(userId).getFriendsId();
+        Set<Long> userFriendSet = getUserById(userId).getFriendsId();
         Set<Long> anotherUserFriendSet = getUserById(friendId).getFriendsId();
         if (userFriendSet.isEmpty() || anotherUserFriendSet.isEmpty()) {
             return new ArrayList<>();
