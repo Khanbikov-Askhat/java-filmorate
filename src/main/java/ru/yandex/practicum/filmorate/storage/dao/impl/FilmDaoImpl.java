@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage.dao.impl;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.exceptions.film.FilmorateAlreadyExistsExcep
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.dao.FilmDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.FilmDao;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.yandex.practicum.filmorate.storage.sqloperation.FilmSqlOperation.*;
+import static ru.yandex.practicum.filmorate.storage.dao.sqloperation.FilmSqlOperation.*;
 
 @Repository
 public class FilmDaoImpl implements FilmDao {

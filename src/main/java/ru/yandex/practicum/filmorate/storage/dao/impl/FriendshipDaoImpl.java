@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage.dao.impl;
 
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -6,11 +6,11 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.user.FriendNotAddedException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.dao.FriendshipDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.FriendshipDao;
 
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.storage.sqloperation.UserSqlOperation.*;
+import static ru.yandex.practicum.filmorate.storage.dao.sqloperation.UserSqlOperation.*;
 
 @Repository
 public class FriendshipDaoImpl implements FriendshipDao {

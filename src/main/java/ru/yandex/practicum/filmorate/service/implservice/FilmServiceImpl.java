@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service.implservice;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,10 +11,10 @@ import ru.yandex.practicum.filmorate.exceptions.mpa.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.user.UserNotExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.dao.FilmDao;
-import ru.yandex.practicum.filmorate.storage.dao.GenreDao;
-import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
-import ru.yandex.practicum.filmorate.storage.dao.UserDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.FilmDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.GenreDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.MpaDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.UserDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,14 +29,22 @@ import static java.util.function.UnaryOperator.identity;
 @Slf4j
 public class FilmServiceImpl {
 
-    private FilmDao filmDao;
-    private MpaDao mpaDao;
-    private UserDao userDao;
+    final private FilmDao filmDao;
+    final private MpaDao mpaDao;
+    final private UserDao userDao;
     private static final String GENRE_QUALIFIER = "genreDaoImpl";
-    private GenreDao genreDao;
+    private static final String FILM_QUALIFIER = "filmDaoImpl";
+    private static final String USER_QUALIFIER = "userDaoImpl";
+    private static final String MPA_QUALIFIER = "mpaDaoImpl";
+    final private GenreDao genreDao;
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmServiceImpl(JdbcTemplate jdbcTemplate, @Qualifier(GENRE_QUALIFIER) GenreDao genreDao) {
+    public FilmServiceImpl(@Qualifier(FILM_QUALIFIER) FilmDao filmDao, @Qualifier(MPA_QUALIFIER) MpaDao mpaDao,
+                           @Qualifier(USER_QUALIFIER) UserDao userDao,
+                           JdbcTemplate jdbcTemplate, @Qualifier(GENRE_QUALIFIER) GenreDao genreDao) {
+        this.filmDao = filmDao;
+        this.mpaDao = mpaDao;
+        this.userDao = userDao;
         this.genreDao = genreDao;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -193,21 +200,4 @@ public class FilmServiceImpl {
                 rs.getString("genre_name"));
     }
 
-    @Autowired
-    @Qualifier("filmDaoImpl")
-    public void setFilmDao(FilmDao filmDao) {
-        this.filmDao = filmDao;
-    }
-
-    @Autowired
-    @Qualifier("ratingDaoImpl")
-    public void setRatingDao(MpaDao ratingDao) {
-        this.mpaDao = ratingDao;
-    }
-
-    @Autowired
-    @Qualifier("userDaoImpl")
-    public void setUserDao(UserDao userDao) {
-        this.userDao = userDao;
-    }
 }

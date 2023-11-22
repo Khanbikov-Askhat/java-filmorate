@@ -5,17 +5,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.mpa.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.MpaDao;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MpaServiceImpl {
     private final MpaDao ratingDao;
 
     @Autowired
-    public MpaServiceImpl(@Qualifier("ratingDaoImpl") MpaDao ratingDao) {
+    public MpaServiceImpl(@Qualifier("mpaDaoImpl") MpaDao ratingDao) {
         this.ratingDao = ratingDao;
     }
 

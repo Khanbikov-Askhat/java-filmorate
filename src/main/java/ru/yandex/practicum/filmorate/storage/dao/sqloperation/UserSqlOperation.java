@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.sqloperation;
+package ru.yandex.practicum.filmorate.storage.dao.sqloperation;
 
 public enum UserSqlOperation {
 

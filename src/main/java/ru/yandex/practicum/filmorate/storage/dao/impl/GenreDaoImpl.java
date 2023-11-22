@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage.dao.impl;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -7,14 +7,14 @@ import ru.yandex.practicum.filmorate.exceptions.genre.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmGenreMapper;
 import ru.yandex.practicum.filmorate.mapper.GenreMapper;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.dao.GenreDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.GenreDao;
 
 
 import java.util.List;
 import java.util.Optional;
 
 
-import static ru.yandex.practicum.filmorate.storage.sqloperation.GenreSqlOperation.*;
+import static ru.yandex.practicum.filmorate.storage.dao.sqloperation.GenreSqlOperation.*;
 
 @Repository
 public class GenreDaoImpl implements GenreDao {

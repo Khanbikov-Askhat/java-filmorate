@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage.dao.impl;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -7,12 +7,12 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.user.UserNotFoundException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.dao.UserDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.UserDao;
 
 import java.util.List;
 import java.util.Optional;
 
-import static ru.yandex.practicum.filmorate.storage.sqloperation.UserSqlOperation.*;
+import static ru.yandex.practicum.filmorate.storage.dao.sqloperation.UserSqlOperation.*;
 
 @Repository
 public class UserDaoImpl implements UserDao {

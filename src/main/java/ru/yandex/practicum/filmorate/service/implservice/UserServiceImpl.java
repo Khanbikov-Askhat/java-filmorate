@@ -7,11 +7,10 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.exceptions.user.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.dao.FriendshipDao;
-import ru.yandex.practicum.filmorate.storage.dao.UserDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.FriendshipDao;
+import ru.yandex.practicum.filmorate.storage.dao.classdao.UserDao;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -19,6 +18,11 @@ public class UserServiceImpl {
 
     private UserDao userDao;
     private FriendshipDao friendshipDao;
+
+    public UserServiceImpl(@Qualifier("userDaoImpl") UserDao userDao, @Qualifier("friendshipDaoImpl") FriendshipDao friendshipDao) {
+        this.userDao = userDao;
+        this.friendshipDao = friendshipDao;
+    }
 
     public List<User> findAll() {
         return userDao.findAll();
@@ -97,15 +101,4 @@ public class UserServiceImpl {
         }
     }
 
-    @Autowired
-    @Qualifier("userDaoImpl")
-    public void setUserDao(UserDao userStorage) {
-        this.userDao = userStorage;
-    }
-
-    @Autowired
-    @Qualifier("friendshipDaoImpl")
-    public void setFriendshipDao(FriendshipDao friendshipDao) {
-        this.friendshipDao = friendshipDao;
-    }
 }
