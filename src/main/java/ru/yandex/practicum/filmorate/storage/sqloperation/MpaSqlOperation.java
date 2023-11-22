@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.sqloperation;
 
-public enum RatingSqlOperation {
+public enum MpaSqlOperation {
 
     GET_ALL_RATINGS(
             "SELECT * " +
@@ -12,7 +12,7 @@ public enum RatingSqlOperation {
 
     private final String title;
 
-    RatingSqlOperation(String title) {
+    MpaSqlOperation(String title) {
         this.title = title;
     }
 

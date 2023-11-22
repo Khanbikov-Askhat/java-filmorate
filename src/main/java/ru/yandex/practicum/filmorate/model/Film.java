@@ -14,7 +14,7 @@ import java.util.*;
 @Builder
 public class Film {
 
-    private final Rating mpa;
+    private Mpa mpa;
     private Long id;
     @NotNull
     private String name;
@@ -57,4 +57,12 @@ public class Film {
         return values;
     }
 
+    public void addGenre(Genre genre) {
+        if (genres == null) {
+            genres = new ArrayList<Genre>();
+            genres.add(genre);
+        } else {
+            genres.add(genre);
+        }
+    }
 }

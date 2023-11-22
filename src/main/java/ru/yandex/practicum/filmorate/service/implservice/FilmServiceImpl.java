@@ -4,51 +4,73 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.exceptions.film.FilmNotExistException;
-import ru.yandex.practicum.filmorate.exceptions.rating.RatingNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.mpa.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.user.UserNotExistException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.dao.FilmDao;
-import ru.yandex.practicum.filmorate.storage.dao.RatingDao;
+import ru.yandex.practicum.filmorate.storage.dao.GenreDao;
+import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 import ru.yandex.practicum.filmorate.storage.dao.UserDao;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.function.UnaryOperator.identity;
+
 
 @Service
 @Slf4j
 public class FilmServiceImpl {
 
     private FilmDao filmDao;
-    private RatingDao ratingDao;
+    private MpaDao mpaDao;
     private UserDao userDao;
+    private static final String GENRE_QUALIFIER = "genreDaoImpl";
+    private GenreDao genreDao;
+    private final JdbcTemplate jdbcTemplate;
+
+    public FilmServiceImpl(JdbcTemplate jdbcTemplate, @Qualifier(GENRE_QUALIFIER) GenreDao genreDao) {
+        this.genreDao = genreDao;
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
 
     public List<Film> findAll() {
-        return filmDao.findAll();
+        final List<Film> films = filmDao.findAll();
+        for (Film film: films) {
+            if (film.getGenres() == null) {
+                film.setGenres(new ArrayList<Genre>());
+            }
+        }
+        load(films);
+        return films;
+    }
+
+    public Film findById(Long filmId) {
+        Optional<Film> foundedFilm = getFilmById(filmId);
+        return foundedFilm.get();
     }
 
 
-    public Optional<Film> findById(Long filmId) {
-        return filmDao.getFilmById(filmId);
-    }
-
-
-    public Optional<Film> save(Film film) {
+    public Film save(Film film) {
         filmValidation(film);
         return filmDao.save(film);
     }
 
 
-    public Optional<Film> update(Film film) {
+    public Film update(Film film) {
         filmValidation(film);
         filmExistsValidation(film);
-        return filmDao.update(film);
+        setGenresToFilm(film);
+        return filmDao.update(film).get();
     }
 
 
@@ -80,13 +102,13 @@ public class FilmServiceImpl {
     }
 
     private void filmExistsValidation(Film film) {
-        if (film.getId() < 0 || filmDao.getFilmById(film.getId()).isEmpty()) {
+        if (film.getId() < 0 || getFilmById(film.getId()).isEmpty()) {
             throw new FilmNotExistException("Фильм  с id: " + film.getId() + " не найден");
         }
     }
 
     private void filmIdExistsValidation(Long filmId) {
-        if (filmDao.getFilmById(filmId).isEmpty()) {
+        if (getFilmById(filmId).isEmpty()) {
             throw new FilmNotExistException("Фильм  с id: " + filmId + " не найден");
         }
     }
@@ -116,10 +138,59 @@ public class FilmServiceImpl {
             film.setGenres(film.getGenres().stream().distinct().collect(Collectors.toList()));
         }
         try {
-            ratingDao.getRatingById(film.getMpa().getId());
+            mpaDao.getRatingById(film.getMpa().getId());
         } catch (DataAccessException e) {
-            throw new RatingNotFoundException("Рейтинг не найден");
+            throw new MpaNotFoundException("Рейтинг не найден");
         }
+    }
+
+    public Optional<Film> getFilmById(Long filmId) {
+        Optional<Film> film = filmDao.getValidFilmByFilmId(filmId);
+        if (film.isPresent()) {
+            film.get().setGenres(genreDao.getGenresByFilmId(filmId));
+            film.get().getFilmLikes().addAll(new HashSet<>(filmDao.getLikesByFilmId(filmId)));
+        }
+        return film;
+    }
+
+    private void setGenresToFilm(Film film) {
+        try {
+            List<Genre> genresFromDbByFilm = genreDao.getGenresIdByFilmId(film.getId());
+            if (!film.getGenres().isEmpty()) {
+                List<Genre> genresFromUI = new ArrayList<>(film.getGenres());
+                if (genresFromDbByFilm.isEmpty()) {
+                    filmDao.updateFilmGenres(genresFromUI, film);
+                } else {
+                    List<Genre> matchedGenres = filmDao.getGenresMatch(genresFromUI, genresFromDbByFilm);
+                    genresFromUI.removeAll(matchedGenres);
+                    genresFromDbByFilm.removeAll(matchedGenres);
+                    filmDao.deleteFilmGenresFromDb(genresFromDbByFilm);
+                    filmDao.updateFilmGenres(genresFromUI, film);
+                }
+            } else {
+                filmDao.deleteFilmGenresFromDb(genresFromDbByFilm);
+            }
+        } catch (DataAccessException e) {
+            throw new FilmNotExistException("Жанр не найден" + e.getMessage());
+        }
+    }
+
+    public void load(List<Film> films) {
+        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+        final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, identity()));
+        final String sqlQuery = "SELECT * FROM FILM_GENRE fg, " + //"SELECT g.GENRE_ID, g.GENRE_NAME FROM FILM_GENRE AS fg " +
+                "GENRE g WHERE fg.GENRE_ID = g.GENRE_ID AND" +
+                " fg.film_id in (" + inSql + ")";
+        jdbcTemplate.query(sqlQuery,  (rs) -> {
+            final Film film = filmById.get(rs.getLong("FILM_ID"));
+            film.addGenre(makeGenre(rs, 0));
+        }, films.stream().map(Film::getId).toArray());
+    }
+
+    static Genre makeGenre(ResultSet rs, int rowNum) throws SQLException {
+        return new Genre(
+                rs.getLong("genre_id"),
+                rs.getString("genre_name"));
     }
 
     @Autowired
@@ -130,8 +201,8 @@ public class FilmServiceImpl {
 
     @Autowired
     @Qualifier("ratingDaoImpl")
-    public void setRatingDao(RatingDao ratingDao) {
-        this.ratingDao = ratingDao;
+    public void setRatingDao(MpaDao ratingDao) {
+        this.mpaDao = ratingDao;
     }
 
     @Autowired

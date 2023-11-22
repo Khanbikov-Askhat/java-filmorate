@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controllers.implcontrollers;
+package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.service.implservice.FilmServiceImpl;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/films")
@@ -30,30 +30,29 @@ public class FilmImplController {
     }
 
     @GetMapping("/{filmId}")
-    public Optional<Film> findById(@PathVariable("filmId") @Min(0) Long filmId) {
+    public Film findById(@PathVariable("filmId") @Min(0) Long filmId) {
         log.info("Получен GET-запрос /films/{}", filmId);
-        Optional<Film> foundedFilm = filmService.findById(filmId);
+        Film foundedFilm = filmService.findById(filmId);
         log.info("Отправлен ответ на GET-запрос /films/{} с телом: {}", filmId, foundedFilm);
+
         return foundedFilm;
 
     }
 
     @PostMapping
-    public Optional<Film> save(@RequestBody @Valid Film film) {
+    public Film save(@RequestBody @Valid Film film) {
         log.info("Пришел POST-запрос /films с телом: {}", film);
-        Optional<Film> createdFilm = filmService.save(film);
+        Film createdFilm = filmService.save(film);
         log.info("Отправлен ответ на POST-запрос /films с телом: {}", createdFilm);
         return createdFilm;
-        //return filmService.save(film);
     }
 
     @PutMapping
-    public Optional<Film> update(@RequestBody @Valid Film film) {
+    public Film update(@RequestBody @Valid Film film) {
         log.info("Пришел PUT-запрос /films с телом: {}", film);
-        Optional<Film> updatedFilm = filmService.update(film);
+        Film updatedFilm = filmService.update(film);
         log.info("Отправлен ответ на PUT-запрос /films с телом: {}", updatedFilm);
         return updatedFilm;
-        //return filmService.update(film);
     }
 
     @DeleteMapping("/{filmId}")

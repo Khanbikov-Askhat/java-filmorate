@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controllers.implcontrollers;
+package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.implservice.GenreServiceImpl;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/genres")
@@ -32,9 +31,9 @@ public class GenreImplController {
     }
 
     @GetMapping("/{genreId}")
-    public Optional<Genre> findById(@PathVariable Long genreId) {
+    public Genre findById(@PathVariable Long genreId) {
         log.info("Пришел GET-запрос /genres/{}", genreId);
-        Optional<Genre> genre = genreService.findById(genreId);
+        Genre genre = genreService.findById(genreId);
         log.info("Отправлен ответ на GET-запрос /genres/{} с телом: {}", genreId, genre);
         return genre;
     }

@@ -17,7 +17,6 @@ import java.util.Set;
 @Builder
 public class User {
 
-    private final Map<Long, Boolean> friends = new HashMap<>();
     private Long id;
     @NotBlank
     @Email

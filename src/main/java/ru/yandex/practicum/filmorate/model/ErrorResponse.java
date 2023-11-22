@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
 public class ErrorResponse {
-    private final String error;
-    private final String description;
+    private String error;
+    private String description;
 
     public ErrorResponse(String error, String description) {
         this.error = error;

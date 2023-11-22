@@ -3,33 +3,33 @@ package ru.yandex.practicum.filmorate.service.implservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.rating.RatingNotFoundException;
-import ru.yandex.practicum.filmorate.model.Rating;
-import ru.yandex.practicum.filmorate.storage.dao.RatingDao;
+import ru.yandex.practicum.filmorate.exceptions.mpa.MpaNotFoundException;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class MpaServiceImpl {
-    private final RatingDao ratingDao;
+    private final MpaDao ratingDao;
 
     @Autowired
-    public MpaServiceImpl(@Qualifier("ratingDaoImpl") RatingDao ratingDao) {
+    public MpaServiceImpl(@Qualifier("ratingDaoImpl") MpaDao ratingDao) {
         this.ratingDao = ratingDao;
     }
 
-    public Optional<Rating> findById(Long ratingId) {
+    public Mpa findById(Long ratingId) {
         if (ratingDao.getRatingById(ratingId).isEmpty()) {
-            throw new RatingNotFoundException("Пользователь с id: " + ratingId + " не найден");
+            throw new MpaNotFoundException("Пользователь с id: " + ratingId + " не найден");
         }
         if (ratingId < 0) {
-            throw new RatingNotFoundException("Рейтинг не найден");
+            throw new MpaNotFoundException("Рейтинг не найден");
         }
-        return ratingDao.getRatingById(ratingId);
+        return ratingDao.getRatingById(ratingId).get();
     }
 
-    public List<Rating> findAll() {
+    public List<Mpa> findAll() {
         return ratingDao.getAllRatings();
     }
 }

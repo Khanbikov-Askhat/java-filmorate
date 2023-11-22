@@ -8,8 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @Builder
-public
-class Rating {
-    private final long id;
+public class Mpa {
+    private long id;
     private String name;
 }

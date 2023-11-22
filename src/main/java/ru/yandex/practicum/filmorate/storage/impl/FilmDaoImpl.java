@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,12 +11,10 @@ import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.dao.FilmDao;
-import ru.yandex.practicum.filmorate.storage.dao.GenreDao;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,31 +25,26 @@ import static ru.yandex.practicum.filmorate.storage.sqloperation.FilmSqlOperatio
 public class FilmDaoImpl implements FilmDao {
     private static final String FILM_TABLE_NAME = "films";
     private static final String FILM_TABLE_ID_COLUMN_NAME = "film_id";
-    private static final String GENRE_QUALIFIER = "genreDaoImpl";
-    private final JdbcTemplate jdbcTemplate;
-    private final GenreDao genreDao;
 
-    public FilmDaoImpl(JdbcTemplate jdbcTemplate, @Qualifier(GENRE_QUALIFIER) GenreDao genreDao) {
+    private final JdbcTemplate jdbcTemplate;
+
+
+    public FilmDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.genreDao = genreDao;
+
     }
 
     @Override
     public List<Film> findAll() {
         List<Film> foundedFilm = jdbcTemplate.query(GET_ALL_FILMS.getTitle(), new FilmMapper());
-        for (Film film : foundedFilm) {
-            if (film.getGenres() == null) {
-                film.setGenres(genreDao.getGenresByFilmId(film.getId()));
-            }
-        }
         return foundedFilm;
     }
 
     @Override
-    public Optional<Film> save(Film film) {
+    public Film save(Film film) {
         filmInsertAndSetId(film);
         addGenresToFilm(film);
-        return Optional.of(film);
+        return film;
     }
 
     @Override
@@ -64,7 +56,6 @@ public class FilmDaoImpl implements FilmDao {
                 film.getReleaseDate(),
                 film.getMpa().getId(),
                 film.getId());
-        setGenresToFilm(film);
         return Optional.of(film);
     }
 
@@ -75,16 +66,6 @@ public class FilmDaoImpl implements FilmDao {
         } catch (DataAccessException e) {
             throw new FilmNotExistException("Фильм не найден" + e.getMessage());
         }
-    }
-
-    @Override
-    public Optional<Film> getFilmById(Long filmId) {
-        Optional<Film> film = getValidFilmByFilmId(filmId);
-        if (film.isPresent()) {
-            film.get().setGenres(genreDao.getGenresByFilmId(filmId));
-            film.get().getFilmLikes().addAll(new HashSet<>(getLikesByFilmId(filmId)));
-        }
-        return film;
     }
 
     @Override
@@ -116,7 +97,7 @@ public class FilmDaoImpl implements FilmDao {
         return jdbcTemplate.queryForList(GET_USER_LIKES_BY_FILM_ID.getTitle(), Long.class, filmId);
     }
 
-    private Optional<Film> getValidFilmByFilmId(Long filmId) {
+    public Optional<Film> getValidFilmByFilmId(Long filmId) {
         try {
             return Optional.ofNullable(jdbcTemplate
                     .queryForObject(GET_FILM_BY_FILM_ID.getTitle(), new FilmMapper(), filmId));
@@ -125,11 +106,11 @@ public class FilmDaoImpl implements FilmDao {
         }
     }
 
-    private boolean isLikeExistsInFilm(long filmId, long userId) {
+    public boolean isLikeExistsInFilm(long filmId, long userId) {
         return getLikesByFilmId(filmId).contains(userId);
     }
 
-    private void filmInsertAndSetId(Film film) {
+    public void filmInsertAndSetId(Film film) {
         long filmId = getFilmSimpleJdbcInsert().executeAndReturnKey(film.toMap()).longValue();
         film.setId(filmId);
     }
@@ -148,35 +129,13 @@ public class FilmDaoImpl implements FilmDao {
         }
     }
 
-    private void setGenresToFilm(Film film) {
-        try {
-            List<Genre> genresFromDbByFilm = genreDao.getGenresIdByFilmId(film.getId());
-            if (!film.getGenres().isEmpty()) {
-                List<Genre> genresFromUI = new ArrayList<>(film.getGenres());
-                if (genresFromDbByFilm.isEmpty()) {
-                    updateFilmGenres(genresFromUI, film);
-                } else {
-                    List<Genre> matchedGenres = getGenresMatch(genresFromUI, genresFromDbByFilm);
-                    genresFromUI.removeAll(matchedGenres);
-                    genresFromDbByFilm.removeAll(matchedGenres);
-                    deleteFilmGenresFromDb(genresFromDbByFilm);
-                    updateFilmGenres(genresFromUI, film);
-                }
-            } else {
-                deleteFilmGenresFromDb(genresFromDbByFilm);
-            }
-        } catch (DataAccessException e) {
-            throw new FilmNotExistException("Жанр не найден" + e.getMessage());
-        }
-    }
-
-    private List<Genre> getGenresMatch(List<Genre> genres1, List<Genre> genres2) {
+    public List<Genre> getGenresMatch(List<Genre> genres1, List<Genre> genres2) {
         return genres1.stream()
                 .filter(front -> genres2.stream().anyMatch(db -> db.getId() == front.getId()))
                 .collect(Collectors.toList());
     }
 
-    private void deleteFilmGenresFromDb(List<Genre> genres) {
+    public void deleteFilmGenresFromDb(List<Genre> genres) {
         if (!genres.isEmpty()) {
             for (Genre genre : genres) {
                 jdbcTemplate.update(DELETE_FILM_GENRES_BY_GENRE_ID.getTitle(), genre.getId());
@@ -184,7 +143,7 @@ public class FilmDaoImpl implements FilmDao {
         }
     }
 
-    private void updateFilmGenres(List<Genre> genresFromFrontEnd, Film film) {
+    public void updateFilmGenres(List<Genre> genresFromFrontEnd, Film film) {
         if (!genresFromFrontEnd.isEmpty()) {
             jdbcTemplate.batchUpdate(CREATE_FILM_GENRE.getTitle(), new BatchPreparedStatementSetter() {
                 @Override

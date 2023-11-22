@@ -25,18 +25,18 @@ public class UserServiceImpl {
     }
 
 
-    public Optional<User> findById(Long userId) {
-        return userDao.getUserById(userId);
+    public User findById(Long userId) {
+        return userDao.getUserById(userId).get();
     }
 
-    public Optional<User> save(User user) {
+    public User save(User user) {
         validateUser(user);
-        return userDao.save(user);
+        return userDao.save(user).get();
     }
 
-    public Optional<User> update(User user) {
+    public User update(User user) {
         userValidation(user);
-        return userDao.update(user);
+        return userDao.update(user).get();
     }
 
     public void delete(Long userId) {
