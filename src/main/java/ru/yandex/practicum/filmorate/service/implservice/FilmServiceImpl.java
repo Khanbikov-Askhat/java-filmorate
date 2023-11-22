@@ -15,38 +15,32 @@ import ru.yandex.practicum.filmorate.storage.dao.classdao.FilmDao;
 import ru.yandex.practicum.filmorate.storage.dao.classdao.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.classdao.MpaDao;
 import ru.yandex.practicum.filmorate.storage.dao.classdao.UserDao;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.function.UnaryOperator.identity;
+
 
 
 @Service
 @Slf4j
 public class FilmServiceImpl {
 
-    final private FilmDao filmDao;
-    final private MpaDao mpaDao;
-    final private UserDao userDao;
     private static final String GENRE_QUALIFIER = "genreDaoImpl";
     private static final String FILM_QUALIFIER = "filmDaoImpl";
     private static final String USER_QUALIFIER = "userDaoImpl";
     private static final String MPA_QUALIFIER = "mpaDaoImpl";
-    final private GenreDao genreDao;
-    private final JdbcTemplate jdbcTemplate;
+    private final FilmDao filmDao;
+    private final MpaDao mpaDao;
+    private final UserDao userDao;
+    private final GenreDao genreDao;
 
     public FilmServiceImpl(@Qualifier(FILM_QUALIFIER) FilmDao filmDao, @Qualifier(MPA_QUALIFIER) MpaDao mpaDao,
-                           @Qualifier(USER_QUALIFIER) UserDao userDao,
-                           JdbcTemplate jdbcTemplate, @Qualifier(GENRE_QUALIFIER) GenreDao genreDao) {
+                           @Qualifier(USER_QUALIFIER) UserDao userDao, @Qualifier(GENRE_QUALIFIER) GenreDao genreDao) {
         this.filmDao = filmDao;
         this.mpaDao = mpaDao;
         this.userDao = userDao;
         this.genreDao = genreDao;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
 
@@ -57,13 +51,20 @@ public class FilmServiceImpl {
                 film.setGenres(new ArrayList<Genre>());
             }
         }
-        load(films);
+        genreDao.load(films);
         return films;
     }
 
+
     public Film findById(Long filmId) {
+
         Optional<Film> foundedFilm = getFilmById(filmId);
-        return foundedFilm.get();
+        Film film = foundedFilm.get();
+        if (film.getGenres() == null) {
+            film.setGenres(new ArrayList<Genre>());
+        }
+        genreDao.load((Collections.singletonList(film)));
+        return film;
     }
 
 
@@ -153,10 +154,6 @@ public class FilmServiceImpl {
 
     public Optional<Film> getFilmById(Long filmId) {
         Optional<Film> film = filmDao.getValidFilmByFilmId(filmId);
-        if (film.isPresent()) {
-            film.get().setGenres(genreDao.getGenresByFilmId(filmId));
-            film.get().getFilmLikes().addAll(new HashSet<>(filmDao.getLikesByFilmId(filmId)));
-        }
         return film;
     }
 
@@ -182,22 +179,5 @@ public class FilmServiceImpl {
         }
     }
 
-    public void load(List<Film> films) {
-        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
-        final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, identity()));
-        final String sqlQuery = "SELECT * FROM FILM_GENRE fg, " + //"SELECT g.GENRE_ID, g.GENRE_NAME FROM FILM_GENRE AS fg " +
-                "GENRE g WHERE fg.GENRE_ID = g.GENRE_ID AND" +
-                " fg.film_id in (" + inSql + ")";
-        jdbcTemplate.query(sqlQuery,  (rs) -> {
-            final Film film = filmById.get(rs.getLong("FILM_ID"));
-            film.addGenre(makeGenre(rs, 0));
-        }, films.stream().map(Film::getId).toArray());
-    }
-
-    static Genre makeGenre(ResultSet rs, int rowNum) throws SQLException {
-        return new Genre(
-                rs.getLong("genre_id"),
-                rs.getString("genre_name"));
-    }
 
 }

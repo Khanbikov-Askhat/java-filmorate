@@ -16,8 +16,8 @@ import java.util.List;
 @Slf4j
 public class UserServiceImpl {
 
-    private UserDao userDao;
-    private FriendshipDao friendshipDao;
+    private final UserDao userDao;
+    private final FriendshipDao friendshipDao;
 
     public UserServiceImpl(@Qualifier("userDaoImpl") UserDao userDao, @Qualifier("friendshipDaoImpl") FriendshipDao friendshipDao) {
         this.userDao = userDao;
