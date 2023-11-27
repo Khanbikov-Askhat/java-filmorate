@@ -8,13 +8,13 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @Builder
 public class Film {
 
+    private Mpa mpa;
     private Long id;
     @NotNull
     private String name;
@@ -25,8 +25,9 @@ public class Film {
     private LocalDate releaseDate;
     @JsonIgnore
     private Set<Long> filmLikes;
+    private List<Genre> genres;
 
-    public boolean setFilmLikes (Long friendId) {
+    public boolean setFilmLikes(Long friendId) {
         if (filmLikes == null) {
             filmLikes = new HashSet<Long>();
             return filmLikes.add(friendId);
@@ -34,11 +35,11 @@ public class Film {
         return filmLikes.add(friendId);
     }
 
-    public void removeLike (Long id) {
+    public void removeLike(Long id) {
         filmLikes.remove(id);
     }
 
-    public Set<Long> getFilmLikes () {
+    public Set<Long> getFilmLikes() {
         if (filmLikes == null) {
             filmLikes = new HashSet<Long>();
             return filmLikes;
@@ -46,4 +47,22 @@ public class Film {
         return filmLikes;
     }
 
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("film_name", name);
+        values.put("description", description);
+        values.put("duration", duration);
+        values.put("release_date", releaseDate);
+        values.put("mpa_id", mpa.getId());
+        return values;
+    }
+
+    public void addGenre(Genre genre) {
+        if (genres == null) {
+            genres = new ArrayList<Genre>();
+            genres.add(genre);
+        } else {
+            genres.add(genre);
+        }
+    }
 }

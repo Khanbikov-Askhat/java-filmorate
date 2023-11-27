@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.film;
+package ru.yandex.practicum.filmorate.storage.inmemory.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
 

@@ -8,7 +8,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -27,7 +29,7 @@ public class User {
     @JsonIgnore
     private Set<Long> friendsId;
 
-    public boolean setFriendsId (Long friendId) {
+    public boolean setFriendsId(Long friendId) {
         if (friendsId == null) {
             friendsId = new HashSet<Long>();
             return friendsId.add(friendId);
@@ -35,15 +37,25 @@ public class User {
         return friendsId.add(friendId);
     }
 
-    public void removeFriend (Long id) {
+    public void removeFriend(Long id) {
         friendsId.remove(id);
     }
 
-    public Set<Long> getFriendsId () {
+    public Set<Long> getFriendsId() {
         if (friendsId == null) {
             friendsId = new HashSet<Long>();
             return friendsId;
         }
         return friendsId;
     }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("user_name", name);
+        values.put("login", login);
+        values.put("email", email);
+        values.put("birthday", birthday);
+        return values;
+    }
+
 }
